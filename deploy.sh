@@ -1,14 +1,20 @@
 #!/bin/bash
 set -e
 
+# Получаем текущую папку, где лежит скрипт
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+USER_NAME=$(whoami)
+
 echo "=== Развёртывание системы прогнозного мониторинга ==="
+echo "Папка проекта: $PROJECT_DIR"
+echo "Пользователь: $USER_NAME"
 
 # 1. Проверка и установка Docker
 if ! command -v docker &> /dev/null; then
     echo "Установка Docker..."
     sudo apt update
     sudo apt install -y docker.io docker-compose
-    sudo usermod -aG docker $USER
+    sudo usermod -aG docker $USER_NAME
     echo "Docker установлен. Перезапустите сессию и запустите скрипт заново."
     exit 0
 fi
@@ -20,7 +26,7 @@ if ! command -v python3 &> /dev/null; then
 fi
 
 # 3. Создание виртуального окружения
-cd ~/diploma
+cd "$PROJECT_DIR"
 if [ ! -d "venv" ]; then
     echo "Создание виртуального окружения Python..."
     python3 -m venv venv
@@ -38,9 +44,9 @@ Requires=docker.service
 
 [Service]
 Type=simple
-User=$USER
-WorkingDirectory=/home/$USER/diploma
-ExecStart=/home/$USER/diploma/venv/bin/python3 /home/$USER/diploma/ml-service/predictor.py
+User=$USER_NAME
+WorkingDirectory=$PROJECT_DIR
+ExecStart=$PROJECT_DIR/venv/bin/python3 $PROJECT_DIR/ml-service/predictor.py
 Restart=always
 RestartSec=10
 StandardOutput=append:/var/log/ml-predictor.log
