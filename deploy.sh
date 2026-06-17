@@ -15,7 +15,7 @@ echo "Папка проекта: $PROJECT_DIR"
 echo "Пользователь: $USER_NAME"
 
 # ==========================================
-# 2. УСТАНОВКА DOCKER И DOCKER COMPOSE
+# 2. УСТАНОВКА DOCKER
 # ==========================================
 if ! command -v docker &> /dev/null; then
     echo "Установка Docker..."
@@ -26,33 +26,55 @@ if ! command -v docker &> /dev/null; then
     sudo chmod a+r /etc/apt/keyrings/docker.asc
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
     sudo apt update
-    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
     sudo usermod -aG docker $USER_NAME
     echo "Docker установлен. Перезапустите сессию и запустите скрипт заново."
     exit 0
 fi
 
-# Проверка Docker Compose (V2)
+# ==========================================
+# 3. УСТАНОВКА DOCKER COMPOSE (УНИВЕРСАЛЬНО)
+# ==========================================
+# Проверяем, работает ли docker compose
 if ! docker compose version &> /dev/null; then
-    echo "Установка Docker Compose V2..."
-    sudo apt install -y docker-compose-plugin
+    echo "Установка Docker Compose (универсальный способ)..."
+    
+    # Пробуем установить через apt (для Ubuntu 22.04+)
+    if sudo apt install -y docker-compose-v2 2>/dev/null; then
+        echo "Docker Compose V2 установлен через apt"
+    # Пробуем установить старый пакет (для Ubuntu 20.04)
+    elif sudo apt install -y docker-compose 2>/dev/null; then
+        echo "Docker Compose установлен через apt (старая версия)"
+    else
+        # Если apt не помог — ставим через pip (работает везде)
+        echo "Установка Docker Compose через pip..."
+        sudo apt install -y python3-pip
+        pip3 install --user docker-compose
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
+fi
+
+# Проверяем, что docker compose теперь работает
+if ! docker compose version &> /dev/null; then
+    echo "⚠️  ВНИМАНИЕ: Docker Compose не установлен. Попробуй вручную:"
+    echo "sudo apt install docker-compose-v2"
+    echo "Или: pip3 install --user docker-compose"
+    exit 1
 fi
 
 # ==========================================
-# 3. УСТАНОВКА PYTHON И ЗАВИСИМОСТЕЙ
+# 4. УСТАНОВКА PYTHON И ВИРТУАЛЬНОГО ОКРУЖЕНИЯ
 # ==========================================
 if ! command -v python3 &> /dev/null; then
     echo "Установка Python..."
     sudo apt install -y python3 python3-venv python3-pip
 fi
 
-# Убеждаемся, что python3-venv установлен
 if ! dpkg -s python3-venv &> /dev/null; then
     echo "Установка python3-venv..."
     sudo apt install -y python3-venv
 fi
 
-# Создаём виртуальное окружение (если его нет)
 if [ ! -d "venv" ]; then
     echo "Создание виртуального окружения Python..."
     python3 -m venv venv
@@ -62,12 +84,10 @@ source venv/bin/activate
 pip install requests
 
 # ==========================================
-# 4. НАСТРОЙКА SYSTEMD-СЕРВИСА
+# 5. НАСТРОЙКА SYSTEMD-СЕРВИСА
 # ==========================================
 echo "Настройка systemd-сервиса..."
 
-# Проверяем, есть ли нужные папки
-mkdir -p ml-service
 if [ ! -f ml-service/predictor.py ]; then
     echo "Ошибка: файл ml-service/predictor.py не найден!"
     exit 1
@@ -98,24 +118,23 @@ sudo systemctl enable ml-predictor
 sudo systemctl restart ml-predictor
 
 # ==========================================
-# 5. ЗАПУСК КОНТЕЙНЕРОВ
+# 6. ЗАПУСК КОНТЕЙНЕРОВ
 # ==========================================
 echo "Запуск Docker-контейнеров..."
 
-# Проверяем, есть ли docker-compose.yml
 if [ ! -f docker-compose.yml ]; then
     echo "Ошибка: файл docker-compose.yml не найден!"
     exit 1
 fi
 
-# Запускаем контейнеры
 if ! docker compose up -d; then
-    echo "Ошибка при запуске контейнеров! Проверь логи: docker compose logs"
+    echo "⚠️  Контейнеры не запустились. Проверь логи:"
+    echo "docker compose logs"
     exit 1
 fi
 
 # ==========================================
-# 6. ПРОВЕРКА
+# 7. ИТОГИ
 # ==========================================
 echo ""
 echo "=== РАЗВЁРТЫВАНИЕ ЗАВЕРШЕНО! ==="
