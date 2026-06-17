@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система прогнозного мониторинга и авто-восстановления</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Система прогнозного мониторинга</h1>
+            <h2>и авто-восстановления</h2>
+            <p class="subtitle">Дипломный проект по специальности «Сетевое и системное администрирование»</p>
+        </header>
+
+        <main>
+            <section class="card">
+                <h3>📊 Что делает эта система?</h3>
+                <p>Это интеллектуальная система, которая <strong>автоматически собирает метрики</strong> с вашего веб-приложения, <strong>предсказывает рост нагрузки</strong> с помощью машинного обучения и <strong>заранее запускает дополнительные копии сайта</strong>, чтобы он не упал под наплывом пользователей.</p>
+            </section>
+
+            <div class="grid-2">
+                <section class="card">
+                    <h3>🤖 Как это работает?</h3>
+                    <ol>
+                        <li><strong>Prometheus</strong> каждые 5 секунд собирает метрики (RPS, CPU).</li>
+                        <li><strong>ML-модель (Prophet)</strong> анализирует историю и делает прогноз на 5-10 минут вперёд.</li>
+                        <li><strong>Python-сервис</strong> сравнивает прогноз с порогом.</li>
+                        <li>При превышении порога <strong>автоматически запускается новый Docker-контейнер</strong> с сайтом.</li>
+                        <li>Трафик распределяется через балансировщик, сайт остаётся в строю.</li>
+                    </ol>
+                </section>
+
+		<section class="card">
+    		   <h3>📈 Где это применимо?</h3>
+   		   <ul>
+       		       <li><strong> Корпоративные порталы</strong> — массовый вход сотрудников в 9:00 и 14:00</li>
+		       <li><strong> Интернет-магазины</strong> — Чёрная пятница, распродажи</li>
+        	       <li><strong> Платформы онлайн-образования</strong> — старт вебинаров, открытие записи на курсы</li>
+        	       <li><strong> Медицинские информационные системы (МИС)</strong> — запись к врачам в понедельник утром</li>
+    		  </ul>
+		</section>
+            </div>
+		
+            <section class="card stats">
+                <h3>📊 Статус системы прямо сейчас</h3>
+                <div class="stats-grid">
+                    <div class="stat">
+                        <span class="stat-label">Нагрузка (RPS)</span>
+                        <span class="stat-value" id="rps-value">0.00</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Активные контейнеры</span>
+                        <span class="stat-value" id="replicas-value">1</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Статус</span>
+                        <span class="stat-value ok" id="status-value">✅ Работает</span>
+                    </div>
+                </div>
+                <p class="note">*Данные обновляются в реальном времени через Prometheus API</p>
+            </section>
+
+            <section class="card tech">
+                <h3>🛠️ Технологический стек</h3>
+                <div class="tech-icons">
+                    <span class="tech-icon">Docker</span>
+                    <span class="tech-icon">Prometheus</span>
+                    <span class="tech-icon">Grafana</span>
+                    <span class="tech-icon">Python</span>
+                    <span class="tech-icon">ML (Prophet)</span>
+                    <span class="tech-icon">Nginx</span>
+                    <span class="tech-icon">Systemd</span>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Дипломный проект 2026 | Сетевое и системное администрирование</p>
+            <p><a href="http://192.168.1.13:3000" target="_blank">📊 Перейти к Grafana</a> | <a href="http://192.168.1.13:9090" target="_blank">📈 Prometheus</a></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
